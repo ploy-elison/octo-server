@@ -54,10 +54,9 @@ func (a *VoiceAdapter) transcribe(c *wkhttp.Context) {
 func (a *VoiceAdapter) getConfig(c *wkhttp.Context) {
 	resp, err := a.client.GetConfig()
 	if err != nil {
-		a.Error("get config failed", zap.Error(err))
-		c.JSON(http.StatusBadGateway, gin.H{
-			"status": http.StatusBadGateway,
-			"msg":    "speech service unavailable",
+		a.Warn("get config failed, returning disabled fallback", zap.Error(err))
+		c.JSON(http.StatusOK, gin.H{
+			"enabled": false,
 		})
 		return
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -224,6 +225,21 @@ func TestGetConfigError(t *testing.T) {
 	_, err := client.GetConfig()
 	if err == nil {
 		t.Fatal("expected error for 503 response")
+	}
+}
+
+func TestGetConfig_ConnectionRefused(t *testing.T) {
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("listen: %v", err)
+	}
+	addr := ln.Addr().String()
+	ln.Close()
+
+	client := NewSpeechClient("http://"+addr, "test-key", 2*time.Second)
+	_, err = client.GetConfig()
+	if err == nil {
+		t.Fatal("expected error for unreachable server")
 	}
 }
 
